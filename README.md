@@ -27,7 +27,7 @@ Constructor:
 ```
 public PlayerStats(XpPerLevel xpFunc, bool autos = true);
 ```
-#XpPerLevel:
+#####XpPerLevel:
 ```
 delegate float XpPerLevel(int level);
 ```
