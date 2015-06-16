@@ -33,7 +33,7 @@ delegate float XpPerLevel(int level);
 ```
 Function returns experience needed for certain level. If the level is max, it must return 0. Example usage:
 
-```
+```c#
 playerStats = new PlayerStats<PlayerPrefsDataProvider>((int lvl) =>
 {
     float[] expArray = { 100, 500, 1000, 1500, 2500, 4000 };
