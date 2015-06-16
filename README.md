@@ -3,7 +3,7 @@ Some useful classes for unity
 
 #### Audio manager example
 
-```
+```c#
 public static void playBackgroundMusic()
 {
   if (!AudioManager.GetInstance().isSoundPlaying("background"))
@@ -24,11 +24,11 @@ public static void playShootSound()
 Class provides level and experience functionality. 
 Constructor:
 
-```
+```c#
 public PlayerStats(XpPerLevel xpFunc, bool autos = true);
 ```
 #####XpPerLevel:
-```
+```c#
 delegate float XpPerLevel(int level);
 ```
 Function returns experience needed for certain level. If the level is max, it must return 0. Example usage:
