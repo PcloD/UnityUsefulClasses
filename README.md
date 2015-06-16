@@ -31,7 +31,20 @@ public PlayerStats(XpPerLevel xpFunc, bool autos = true);
 ```
 delegate float XpPerLevel(int level);
 ```
-function returns experience needed for certain level
-if the level is max, it must return 0
+Function returns experience needed for certain level. If the level is max, it must return 0. Example usage:
 
+```
+playerStats = new PlayerStats<PlayerPrefsDataProvider>((int lvl) =>
+{
+    float[] expArray = { 100, 500, 1000, 1500, 2500, 4000 };
+    int levelIndex = lvl - 1;
+
+    if (levelIndex < expArray.Length)
+    {
+        return expArray[levelIndex];
+    }
+
+    return 0;
+}, false);
+```
 
