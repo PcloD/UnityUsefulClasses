@@ -11,13 +11,17 @@ using UnityEngine;
 class PlayerStats<T> where T: DataIoInterface, new()
 {
     public delegate float XpPerLevel(int level);
+    public delegate void LevelUpCallback(int level);
+
+    public event LevelUpCallback levelUpEvent;
 
     public const string LEVEL_KEY       = "player_level_key";
     public const string CURRENT_XP_KEY  = "player_current_xp_key";
 
-    private float   maxXp;
-    private float   currentXp;
-    private int     level;
+    public float    CurrentXp   { get; private set; }
+    public float    MaxXp       { get; private set; }
+    public int      Level       { get; private set; }
+
     private bool    autosave;
 
     private DataIoInterface dataProvider;
@@ -59,9 +63,9 @@ class PlayerStats<T> where T: DataIoInterface, new()
 
     private void loadValues()
     {
-        level       = getLevelSaved();
-        maxXp       = xpPerLevelFunc(level);
-        currentXp   = getCurrentXpSaved();
+        Level       = getLevelSaved();
+        MaxXp = xpPerLevelFunc(Level);
+        CurrentXp = getCurrentXpSaved();
     }
 
     private int getLevelSaved()
@@ -76,36 +80,41 @@ class PlayerStats<T> where T: DataIoInterface, new()
 
     private void saveLevel()
     {
-        dataProvider.SetInt(LEVEL_KEY,level);
+        dataProvider.SetInt(LEVEL_KEY, Level);
     }
 
     private void saveCurrentXp()
     {
-        dataProvider.SetFloat(CURRENT_XP_KEY, currentXp);
+        dataProvider.SetFloat(CURRENT_XP_KEY, CurrentXp);
     }
 
     public float getLevelProgress()
     {
-        return currentXp / maxXp;
+        return CurrentXp / MaxXp;
     }
 
     public void incXp(float value)
     {
-        currentXp += value;
-        if (currentXp >= maxXp)
+        CurrentXp += value;
+        if (CurrentXp >= MaxXp)
         {
             //check amount of xp for next level. if 0 - no more levels and no need to increate one
-            float newMaxXp = xpPerLevelFunc(level + 1);
+            float newMaxXp = xpPerLevelFunc(Level + 1);
 
             if (newMaxXp != 0)
             {
-                ++level;
-                currentXp -= maxXp;
-                maxXp = newMaxXp;
+                ++Level;
+                CurrentXp -= MaxXp;
+                MaxXp = newMaxXp;
+
+                if (levelUpEvent != null)
+                {
+                    levelUpEvent(Level);
+                }
             }
             else
             {
-                currentXp = maxXp;
+                CurrentXp = MaxXp;
             }
         }
 
@@ -114,11 +123,6 @@ class PlayerStats<T> where T: DataIoInterface, new()
             save();
         }
 
-    }
-
-    public int getLevel()
-    {
-        return level;
     }
 
     public void setAutoSave(bool state)
@@ -132,10 +136,11 @@ class PlayerStats<T> where T: DataIoInterface, new()
         saveCurrentXp();
     }
 
-    public void clearStats()
+    public void clear()
     {
-        level = 1;
-        currentXp = 0;
+        Level = 1;
+        CurrentXp = 0;
+        MaxXp = xpPerLevelFunc(Level);
         save();
     }
 }
