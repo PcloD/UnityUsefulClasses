@@ -5,47 +5,52 @@ using System.Text;
 using UnityEngine;
 
 /*
- * Class that incapsulates user level and experience. 
- * Template parameter provides class that will be used for save/load of data
+ * This class incapsulates user level, experience and health(or whatever your player has). 
+ * Template parameter provides class that will be used for save/load of data. Must implement DataIoInterface
  */
-class PlayerStats<T> where T: DataIoInterface, new()
+class PlayerStats<T> where T : DataIoInterface, new()
 {
-    public delegate float XpPerLevel(int level);
+    public delegate float DataPerLevel(int level);
     public delegate void LevelUpCallback(int level);
 
     public event LevelUpCallback levelUpEvent;
 
-    public const string LEVEL_KEY       = "player_level_key";
-    public const string CURRENT_XP_KEY  = "player_current_xp_key";
+    public const string LEVEL_KEY = "player_level_key";
+    public const string CURRENT_XP_KEY = "player_current_xp_key";
 
-    public float    CurrentXp   { get; private set; }
-    public float    MaxXp       { get; private set; }
-    public int      Level       { get; private set; }
+    public float CurrentXp { get; private set; }
+    public float MaxXp { get; private set; }
 
-    private bool    autosave;
+    /* Player's life || fuel || energy etc
+     */
+    public float CurrentLife { get; private set; }
+    public float MaxLife { get; private set; }
+
+    public int Level { get; private set; }
+
+    //================================ PRIVATE
+
+    /* If enabled - level and xp will be saved after each xp increment
+     */
+    private bool autosave;
+
+    /* Enables life refund after level-up
+     */
+    private bool refundLifeAfterLevelUp = true;
 
     private DataIoInterface dataProvider;
-    /*
-     * Pointer to functiom that returns experience for level that is passed to it
+
+    /* Pointer to functiom that returns experience for level that is passed to it
      * returns 0 if there is no next level
      */
-    private XpPerLevel xpPerLevelFunc;
+    private DataPerLevel xpPerLevelFunc;
 
-    public PlayerStats(XpPerLevel xpFunc, bool autos = true)
-    {
-        dataProvider = new T();
+    /* Returns max life for current level
+     */
+    private DataPerLevel currentLevelHealth;
 
-        xpPerLevelFunc = xpFunc;
-        autosave = autos;
 
-        setInitialValues();
-        loadValues();
-
-        if (!autosave)
-        {
-            Debug.LogWarning("PlayerState: autosave is off");
-        }
-    }
+    //================================ METHODS
 
     private void setInitialValues()
     {
@@ -63,9 +68,11 @@ class PlayerStats<T> where T: DataIoInterface, new()
 
     private void loadValues()
     {
-        Level       = getLevelSaved();
+        Level = getLevelSaved();
         MaxXp = xpPerLevelFunc(Level);
         CurrentXp = getCurrentXpSaved();
+        MaxLife = currentLevelHealth(Level);
+        CurrentLife = MaxLife;
     }
 
     private int getLevelSaved()
@@ -88,46 +95,132 @@ class PlayerStats<T> where T: DataIoInterface, new()
         dataProvider.SetFloat(CURRENT_XP_KEY, CurrentXp);
     }
 
+    private void incLevel()
+    {
+        //TODO(vlad): make this work if xp is enough for a couple of levels (multiple level-ups in the same time)
+
+        //check amount of xp for next level. if 0 - no more levels and no need to increase one
+        float newMaxXp = xpPerLevelFunc(Level + 1);
+
+        if (newMaxXp != 0)
+        {
+            ++Level;
+
+            CurrentXp -= MaxXp;
+            MaxXp = newMaxXp;
+
+            float newMaxLife = currentLevelHealth(Level);
+            //assuming each level your life increases
+            if (refundLifeAfterLevelUp)
+            {
+                float healthDelta = newMaxLife - MaxLife;
+                incLife(healthDelta);
+            }
+            MaxLife = newMaxLife;
+
+            if (levelUpEvent != null)
+            {
+                levelUpEvent(Level);
+            }
+        }
+        else
+        {
+            CurrentXp = MaxXp;
+        }
+    }
+
+    //=================== INTERFACE
+
+    public PlayerStats(DataPerLevel xpFunc, DataPerLevel healthFunc, bool autos = true)
+    {
+        dataProvider = new T();
+
+        xpPerLevelFunc = xpFunc;
+        currentLevelHealth = healthFunc;
+        autosave = autos;
+
+        setInitialValues();
+        loadValues();
+
+        if (!autosave)
+        {
+            Debug.LogWarning("PlayerState: autosave is off");
+        }
+    }
+
     public float getLevelProgress()
     {
         return CurrentXp / MaxXp;
     }
 
+    public float getHealthLevel()
+    {
+        return CurrentLife / MaxLife;
+    }
+
     public void incXp(float value)
     {
+        if (value < 0)
+        {
+            Debug.LogError("XP amount must be a positive number");
+            return;
+        }
+
         CurrentXp += value;
         if (CurrentXp >= MaxXp)
         {
-            //check amount of xp for next level. if 0 - no more levels and no need to increate one
-            float newMaxXp = xpPerLevelFunc(Level + 1);
-
-            if (newMaxXp != 0)
-            {
-                ++Level;
-                CurrentXp -= MaxXp;
-                MaxXp = newMaxXp;
-
-                if (levelUpEvent != null)
-                {
-                    levelUpEvent(Level);
-                }
-            }
-            else
-            {
-                CurrentXp = MaxXp;
-            }
+            incLevel();
         }
 
         if (autosave)
         {
             save();
         }
-
     }
 
-    public void setAutoSave(bool state)
+    public void decLife(float amount)
     {
-        autosave = state;
+        if (amount < 0)
+        {
+            Debug.LogError("Life amount must be a positive number");
+            return;
+        }
+
+        CurrentLife -= amount;
+        if (CurrentLife < 0)
+        {
+            CurrentLife = 0;
+        }
+    }
+
+    public void incLife(float amount)
+    {
+        if (amount < 0)
+        {
+            Debug.LogError("Life amount must be a positive number");
+            return;
+        }
+
+        CurrentLife += amount;
+        if (CurrentLife > MaxLife)
+        {
+            CurrentLife = MaxLife;
+        }
+    }
+
+    public bool isAlive()
+    {
+        return CurrentLife > 0;
+    }
+
+    public void enableAutoSave()
+    {
+        autosave = true;
+    }
+
+    public void disableAutoSave()
+    {
+        autosave = false;
     }
 
     public void save()
@@ -142,5 +235,15 @@ class PlayerStats<T> where T: DataIoInterface, new()
         CurrentXp = 0;
         MaxXp = xpPerLevelFunc(Level);
         save();
+    }
+
+    public void enableLifeRefund()
+    {
+        refundLifeAfterLevelUp = true;
+    }
+
+    public void disableLifeRefund()
+    {
+        refundLifeAfterLevelUp = false;
     }
 }

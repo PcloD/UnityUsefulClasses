@@ -25,26 +25,37 @@ Class provides level and experience functionality.
 Constructor:
 
 ```c#
-public PlayerStats(XpPerLevel xpFunc, bool autos = true);
+public PlayerStats(DataPerLevel xpFunc, DataPerLevel healthFunc, bool autosave = true);
 ```
-#####XpPerLevel:
+##### DataPerLevel:
 ```c#
-delegate float XpPerLevel(int level);
+public delegate float DataPerLevel(int level);
 ```
-Function returns experience needed for certain level. If the level is max, it must return 0. Example usage:
+Returns value based on level. 
 
+DataPerLevel xpFunc: Returns max xp for level passed to it. If the level is max, it must return 0.
+DataPerLevel healthFunc: Returns max life for level passed to it
+
+Example usage:
 ```c#
-playerStats = new PlayerStats<PlayerPrefsDataProvider>((int lvl) =>
-{
-    float[] expArray = { 100, 500, 1000, 1500, 2500, 4000 };
-    int levelIndex = lvl - 1;
-
-    if (levelIndex < expArray.Length)
+playerStats = new PlayerStats<PlayerPrefsDataProvider>(
+    (int lvl) =>
     {
-        return expArray[levelIndex];
-    }
+        float[] expArray = { 100, 500, 1000, 1500, 2500, 4000 };
+        int levelIndex = lvl - 1;
 
-    return 0;
-}, false);
+        if (levelIndex < expArray.Length)
+        {
+            return expArray[levelIndex];
+        }
+
+        return 0;
+    },
+    (int lvl) => {
+        const float startLife = 60;
+        const float lifePerLevel = 10;
+
+        return startLife + energyPerLevel * lvl;
+    });
 ```
 
