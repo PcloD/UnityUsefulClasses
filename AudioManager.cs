@@ -6,12 +6,12 @@ using System.Collections.Generic;
 
 /*
  * General class for playing sounds
- * Too many loops, I know
+ * Too many loops for now :(
  */ 
 public class AudioManager : MonoBehaviour
 {
 
-    #region Public
+    #region Public Variables
     [System.Serializable]
     public class SoundItem
     {
@@ -24,14 +24,16 @@ public class AudioManager : MonoBehaviour
 
     #endregion
 
-    #region Private
-    private const string SOUND_KEY = "sound_key";
-    private const string MASTER_VOLUME_KEY = "masterVolumeKey";
+    #region Private Variables
+    private const string SOUND_KEY          = "sound_key";
+    private const string MASTER_VOLUME_KEY  = "masterVolumeKey";
 
     private AudioSource[] sources;
 
     private static AudioManager instance;
     #endregion
+
+    #region Unity Methods
 
     void Awake()
     {
@@ -43,15 +45,32 @@ public class AudioManager : MonoBehaviour
         }
 
         instance = this;
+        DontDestroyOnLoad(this.gameObject);
 
+        //=======================================
+
+        initSound();
+
+        initChannels();
+    }
+
+    void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            setSound();
+        }
+    }
+
+    #endregion
+
+    #region Private methods
+
+    private void initSound()
+    {
         if (!PlayerPrefs.HasKey(SOUND_KEY))
         {
-            muteOn();
-        }
-
-        if (!isSoundOn())
-        {
-            muteOff();
+            PlayerPrefs.SetInt(SOUND_KEY, 1);
         }
 
         if (!PlayerPrefs.HasKey(MASTER_VOLUME_KEY))
@@ -59,9 +78,12 @@ public class AudioManager : MonoBehaviour
             setVolume(1.0f);
         }
 
+        setSound();
         setVolume(getVolume());
+    }
 
-        DontDestroyOnLoad( this.gameObject );
+    private void initChannels()
+    {
         sources = new AudioSource[channels];
 
         for (int i = 0; i < channels; ++i)
@@ -74,6 +96,45 @@ public class AudioManager : MonoBehaviour
 
         Debug.Log("Audio manager created (" + channels + " channels)");
     }
+
+    private void setSound()
+    {
+        if (!isSoundOn())
+        {
+            muteOff();
+        }
+    }
+
+    private void playSound(AudioClip clipToPlay, bool isLooped = false)
+    {
+        //find free channel and play sound
+        foreach (AudioSource source in sources)
+        {
+            if (!source.isPlaying)
+            {
+                source.clip = clipToPlay;
+                source.loop = isLooped;
+                source.Play();
+                break;
+            }
+        }
+    }
+
+    private void stopSound(AudioClip clipToStop)
+    {
+        foreach (AudioSource source in sources)
+        {
+            if (source.clip == clipToStop && source.isPlaying)
+            {
+                source.Stop();
+                break;
+            }
+        }
+    }
+
+    #endregion
+
+    #region Interface
 
     public static AudioManager GetInstance()
     {
@@ -179,35 +240,6 @@ public class AudioManager : MonoBehaviour
         return PlayerPrefs.GetFloat(MASTER_VOLUME_KEY);
     }
 
-    #region Private methods
-
-    private void playSound(AudioClip clipToPlay, bool isLooped = false)
-    {
-        //find free channel and play sound
-        foreach (AudioSource source in sources)
-        {
-            if (!source.isPlaying)
-            {
-                source.clip = clipToPlay;
-                source.loop = isLooped;
-                source.Play();
-                break;
-            }
-        }
-    }
-
-    private void stopSound(AudioClip clipToStop)
-    {
-        foreach (AudioSource source in sources)
-        {
-            if (source.clip == clipToStop && source.isPlaying)
-            {
-                source.Stop();
-                break;
-            }
-        }
-    }
 
     #endregion
-
 }
