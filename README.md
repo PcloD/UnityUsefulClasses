@@ -66,3 +66,4 @@ playerStats = new PlayerStats<PlayerPrefsDataProvider>(
 4. Go to Heyzap and [create a game](https://developers.heyzap.com/dashboard/games/add_game) than [create mediation](https://developers.heyzap.com/dashboard/mediation)
 5. To test whether everything works correctly see [Step 7](https://developers.heyzap.com/docs/unity_sdk_setup_and_requirements)
 
+
