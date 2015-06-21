@@ -2,7 +2,7 @@
 Some Amazon AWS services wrappers
 
 #### Analytics
-AnalyticsManager is a singleton. 
+AnalyticsManager is a singleton and must be added only once
 
 ##### How to use: 
 1. Download [Amazon Unity SDK](https://s3.amazonaws.com/aws-unity-sdk/latest/aws-unity-sdk.zip)
@@ -22,8 +22,19 @@ class AnalyticsController
 	public static void playerGameModeEvent()
 	{
 	    CustomEvent customEvent = new CustomEvent(GAME_MODE_SELECTION_EVENT);
-	    customEvent.AddAttribute(GAME_MODE_ATTR_NAME, GameController.Mode.ToString());
+	    customEvent.AddAttribute(GAME_MODE_ATTR_NAME, "EndlessMode");
 	    AnalyticsManager.Get.RecordEvent(customEvent);
 	}
 }
+```
+
+##### AmazonEventBuilder
+Wrapped Amazon's custom event class.
+
+Example usage:
+
+```c#
+AmazonEventBuilder eventBuilder = new AmazonEventBuilder("TestEvent");
+eventBuilder.AddAttribute("FistName", "John").AddAttribute("LastName", "Smith").AddMetric("Age", 31);
+AnalyticsManager.Get.RecordEvent(eventBuilder);
 ```
