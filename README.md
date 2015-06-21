@@ -1,7 +1,11 @@
 # UnityUsefulClasses
 Some useful classes for unity
 
-#### Audio manager example
+#### AudioManager
+
+Add AudioManager to your game(only to first scene, as it is a singleton), then add to it sounds and corresponding keys.
+
+Exapmle usage:
 
 ```c#
 public static void playBackgroundMusic()
@@ -19,7 +23,7 @@ public static void playShootSound()
 
 ```
 
-#### Player Stats
+#### PlayerStats
 
 Class provides level and experience functionality. 
 Constructor:

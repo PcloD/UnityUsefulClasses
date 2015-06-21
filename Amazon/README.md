@@ -1,7 +1,7 @@
 ## Amazon
 Some Amazon AWS services wrappers
 
-#### Analytics
+#### AnalyticsManager
 AnalyticsManager is a singleton and must be added only once
 
 ##### How to use: 
@@ -28,7 +28,7 @@ class AnalyticsController
 }
 ```
 
-##### AmazonEventBuilder
+#### AmazonEventBuilder
 Wrapped Amazon's custom event class.
 
 Example usage:
