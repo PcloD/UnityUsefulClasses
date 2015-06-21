@@ -61,6 +61,8 @@ playerStats = new PlayerStats<PlayerPrefsDataProvider>(
 
 ###AddsManager
 1. Add this file to your project Assets/Plugin
-2. Download [Heyzap SDK](https://developers.heyzap.com/docs/unity_sdk_setup_and_requirements) for Unity, [Android SDK for Unity](https://github.com/googleads/googleads-mobile-plugins/releases)
+2. Download [Heyzap SDK](https://developers.heyzap.com/docs/unity_sdk_setup_and_requirements) for Unity and [Android SDK for Unity](https://github.com/googleads/googleads-mobile-plugins/releases). Be aware of first-pass compilation.
 3. Change your ads keys in line 52 ```HeyzapAds.start("HeyzAppKey", HeyzapAds.FLAG_NO_OPTIONS);``` for Heyzap and line 55 ```interstitial = new InterstitialAd("AdmobKey");``` for independent Admob integration
+4. Go to Heyzap and [create a game](https://developers.heyzap.com/dashboard/games/add_game) than [create mediation](https://developers.heyzap.com/dashboard/mediation)
+5. To test whether everything works correctly see [Step 7](https://developers.heyzap.com/docs/unity_sdk_setup_and_requirements)
 
