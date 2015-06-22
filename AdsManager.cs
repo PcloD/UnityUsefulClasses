@@ -10,10 +10,10 @@ public static class AdsManager
     public enum 	AdsType { HeyzApp, AdMob };
 	public static 	AdsType currentAdsType 	= AdsType.HeyzApp;
 
-	public const string heyzappKey 			= "heyzappkey";
-	public const string admobKey 			= "ca-app-pub-xxxxxxxxxxxxx/xxxxxxx";
+	public const string heyzappKey 			= "heyzappKey";
+	public const string admobKey 			= "ca-app-pub-xxxxxxxxxxx/xxxxxxxxx";
 
-	private bool isHeyzappInited			= false;
+	private static bool isHeyzappInited		= false;
   
     private static InterstitialAd interstitial;//admob use only
 
