@@ -38,3 +38,8 @@ AmazonEventBuilder eventBuilder = new AmazonEventBuilder("TestEvent");
 eventBuilder.AddAttribute("FistName", "John").AddAttribute("LastName", "Smith").AddMetric("Age", 31);
 AnalyticsManager.Get.RecordEvent(eventBuilder);
 ```
+
+#### DynamoDbBase
+
+Class provides parent class for classes that work with DynamoDB. 
+Detailed description will be added soon.
