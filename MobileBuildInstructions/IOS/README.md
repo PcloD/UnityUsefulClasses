@@ -32,6 +32,6 @@ This section explains how to create IOS build from unity.
 	1. *Linking*
 		* *Other Linker Flags* set **-Objc**
 	2. *Apple LLVM 6.1 - Language - Modules* set **Enable Modules(C and Objective C)**
-		* *If you use ```GoogleMobileAds```* or got  **Module GoogleMobileAds *not found* exception** then *Allow non-modular Includes in Framework Modules* to **YES**
+		* *If you use ```GoogleMobileAds```* or got  **Module GoogleMobileAds *not found* exception** then *Allow non-modular Includes in Framework Modules* to **YES**, if it not help - delete GoogleMobileAds.framework and add it again
 	3. *Architectures*
 		* *Build Active Architecture Only* - **NO**
